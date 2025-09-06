@@ -59,6 +59,46 @@ button:hover {
     margin-top: 0;
 }
 
+#search-container {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+
+#search-container label {
+    margin-right: 10px;
+}
+
+#entry-list-container {
+    margin-bottom: 20px;
+}
+
+#entry-list-container summary {
+    cursor: pointer;
+    font-weight: bold;
+    padding: 5px;
+}
+
+#entry-list-container details[open] summary {
+    border-bottom: 1px solid #ccc;
+}
+
+#entry-list {
+    list-style-type: none;
+    padding: 0;
+    margin-top: 10px;
+}
+
+#entry-list li {
+    cursor: pointer;
+    padding: 5px;
+    border-bottom: 1px solid #eee;
+}
+
+#entry-list li:hover {
+    background-color: #f0f0f0;
+}
+
 @media (max-width: 600px) {
     body {
         margin: 10px;

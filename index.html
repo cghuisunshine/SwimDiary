@@ -21,6 +21,16 @@
         <textarea id="solutions" name="solutions" rows="4"></textarea>
         <button type="submit">Add Entry</button>
     </form>
+    <div id="entry-list-container">
+        <details>
+            <summary>Entries</summary>
+            <div id="search-container">
+                <label for="search-date">Search by Date:</label>
+                <input type="date" id="search-date" name="search-date">
+            </div>
+            <ul id="entry-list"></ul>
+        </details>
+    </div>
     <div id="entries"></div>
     <script src="script.js"></script>
 </body>
