@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swimming Diary</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Swimming Diary</h1>
+    <button id="export-all">Export All Entries</button>
+    <button id="share-all">Share All Entries</button>
+    <form id="diary-form">
+        <label for="date">Date:</label>
+        <input type="date" id="date" name="date" required>
+        <label for="did">What I did:</label>
+        <textarea id="did" name="did" rows="4" required></textarea>
+        <label for="problems">Problems met:</label>
+        <textarea id="problems" name="problems" rows="4"></textarea>
+        <label for="solutions">Possible Solution:</label>
+        <textarea id="solutions" name="solutions" rows="4"></textarea>
+        <button type="submit">Add Entry</button>
+    </form>
+    <div id="entries"></div>
+    <script src="script.js"></script>
+</body>
+</html>
