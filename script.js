@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('problems').value = entry.problems;
         document.getElementById('solutions').value = entry.solutions;
         form.querySelector('button').textContent = 'Save Changes';
+        didInput.focus();
     };
 
     window.deleteEntry = (index) => {
