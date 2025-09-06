@@ -1,6 +1,7 @@
 body {
     font-family: sans-serif;
     margin: 20px;
+    line-height: 1.6;
 }
 
 h1 {
@@ -23,6 +24,8 @@ input, textarea {
     margin-top: 5px;
     border: 1px solid #ccc;
     border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 button {
@@ -52,4 +55,19 @@ button:hover {
 
 .entry h2 {
     margin-top: 0;
+}
+
+@media (max-width: 600px) {
+    body {
+        margin: 10px;
+        font-size: 16px;
+    }
+
+    form {
+        max-width: 100%;
+    }
+
+    h1 {
+        font-size: 1.5em;
+    }
 }
