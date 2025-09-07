@@ -51,6 +51,19 @@ document.addEventListener('DOMContentLoaded', () => {
         entries.sort((a, b) => new Date(b.date) - new Date(a.date));
     };
 
+    const handleInputFocus = (e) => {
+        setTimeout(() => {
+            e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300);
+    };
+
+    const addInputFocusHandlers = () => {
+        const inputs = document.querySelectorAll('input, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('focus', handleInputFocus);
+        });
+    };
+
     const init = () => {
         dateInput.valueAsDate = new Date();
         didInput.focus();
@@ -60,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         displayEntries();
         renderEntryList();
+        addInputFocusHandlers();
     }
 
     window.editEntry = (index) => {
