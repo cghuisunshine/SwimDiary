@@ -76,11 +76,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.deleteEntry = (index) => {
-        entries.splice(index, 1);
-        localStorage.setItem('swimmingDiary', JSON.stringify(entries));
-        sortEntries();
-        displayEntries();
-        renderEntryList();
+        if (confirm('Are you sure you want to delete this entry?')) {
+            entries.splice(index, 1);
+            localStorage.setItem('swimmingDiary', JSON.stringify(entries));
+            sortEntries();
+            displayEntries();
+            renderEntryList();
+        }
     };
 
     window.exportEntry = (index) => {
