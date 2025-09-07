@@ -59,6 +59,16 @@ button:hover {
     margin-top: 0;
 }
 
+.entry p {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.entry p {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
 #search-container {
     margin-bottom: 20px;
     display: flex;
