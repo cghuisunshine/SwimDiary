@@ -19,6 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let editIndex = -1;
     const QUICK_FILL_STORAGE_KEY = 'swimmingDiaryQuickFill';
     let quickFillTemplates = JSON.parse(localStorage.getItem(QUICK_FILL_STORAGE_KEY)) || [];
+    const LAST_USED_TEMPLATE_KEY = 'swimmingDiaryQuickFillLastUsed';
+    let lastUsedTemplateId = localStorage.getItem(LAST_USED_TEMPLATE_KEY) || '';
 
     const displayEntries = (entriesToDisplay = entries) => {
         entriesDiv.innerHTML = '';
@@ -64,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem(QUICK_FILL_STORAGE_KEY, JSON.stringify(quickFillTemplates));
     };
 
-    const renderQuickFillOptions = () => {
+    const renderQuickFillOptions = (preferredId = lastUsedTemplateId) => {
         quickFillSelect.innerHTML = '<option value="">-- Choose saved snippet --</option>';
         for (const template of quickFillTemplates) {
             const option = document.createElement('option');
@@ -77,6 +79,13 @@ document.addEventListener('DOMContentLoaded', () => {
         quickFillSelect.disabled = !hasTemplates;
         applyTemplateButton.disabled = !hasTemplates;
         deleteTemplateButton.disabled = !hasTemplates;
+
+        const hasPreferred = Boolean(preferredId && quickFillTemplates.some(template => template.id === preferredId));
+        quickFillSelect.value = hasPreferred ? preferredId : '';
+
+        if (preferredId && !hasPreferred) {
+            setLastUsedTemplate('');
+        }
     };
 
     const getTemplateById = (id) => quickFillTemplates.find(template => template.id === id);
@@ -91,7 +100,16 @@ document.addEventListener('DOMContentLoaded', () => {
         didInput.focus();
     };
 
-    
+    const setLastUsedTemplate = (id) => {
+        lastUsedTemplateId = id || '';
+        if (lastUsedTemplateId) {
+            localStorage.setItem(LAST_USED_TEMPLATE_KEY, lastUsedTemplateId);
+        } else {
+            localStorage.removeItem(LAST_USED_TEMPLATE_KEY);
+        }
+    };
+
+
 
     const init = () => {
         dateInput.valueAsDate = new Date();
@@ -188,11 +206,17 @@ document.addEventListener('DOMContentLoaded', () => {
     applyTemplateButton.addEventListener('click', () => {
         const template = getTemplateById(quickFillSelect.value);
         applyTemplateToFields(template);
+        if (template) {
+            setLastUsedTemplate(template.id);
+        } else {
+            setLastUsedTemplate('');
+        }
     });
 
     quickFillSelect.addEventListener('change', () => {
         const template = getTemplateById(quickFillSelect.value);
         applyTemplateToFields(template);
+        setLastUsedTemplate(template ? template.id : '');
     });
 
     saveTemplateButton.addEventListener('click', () => {
@@ -243,8 +267,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         persistQuickFillTemplates();
-        renderQuickFillOptions();
-        quickFillSelect.value = nextSelectedId;
+        setLastUsedTemplate(nextSelectedId);
+        renderQuickFillOptions(nextSelectedId);
     });
 
     deleteTemplateButton.addEventListener('click', () => {
@@ -265,8 +289,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         quickFillTemplates = quickFillTemplates.filter(item => item.id !== selectedId);
         persistQuickFillTemplates();
+        if (lastUsedTemplateId === selectedId) {
+            setLastUsedTemplate('');
+        }
         renderQuickFillOptions();
-        quickFillSelect.value = '';
     });
 
     searchDateInput.addEventListener('input', (e) => {
@@ -302,10 +328,10 @@ document.addEventListener('DOMContentLoaded', () => {
         displayEntries();
         renderEntryList();
         form.reset();
+        renderQuickFillOptions();
         dateInput.valueAsDate = new Date();
         didInput.focus();
         submitButton.textContent = 'Add Entry';
-        quickFillSelect.value = '';
     });
 
     init();
