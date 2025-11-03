@@ -3,13 +3,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const entriesDiv = document.getElementById('entries');
     const dateInput = document.getElementById('date');
     const didInput = document.getElementById('did');
+    const problemsInput = document.getElementById('problems');
+    const solutionsInput = document.getElementById('solutions');
     const exportAllButton = document.getElementById('export-all');
     const shareAllButton = document.getElementById('share-all');
     const searchDateInput = document.getElementById('search-date');
     const entryList = document.getElementById('entry-list');
+    const quickFillSelect = document.getElementById('quick-fill-select');
+    const applyTemplateButton = document.getElementById('apply-template');
+    const saveTemplateButton = document.getElementById('save-template');
+    const deleteTemplateButton = document.getElementById('delete-template');
+    const submitButton = document.getElementById('submit-entry');
 
     let entries = JSON.parse(localStorage.getItem('swimmingDiary')) || [];
     let editIndex = -1;
+    const QUICK_FILL_STORAGE_KEY = 'swimmingDiaryQuickFill';
+    let quickFillTemplates = JSON.parse(localStorage.getItem(QUICK_FILL_STORAGE_KEY)) || [];
 
     const displayEntries = (entriesToDisplay = entries) => {
         entriesDiv.innerHTML = '';
@@ -51,6 +60,37 @@ document.addEventListener('DOMContentLoaded', () => {
         entries.sort((a, b) => new Date(b.date) - new Date(a.date));
     };
 
+    const persistQuickFillTemplates = () => {
+        localStorage.setItem(QUICK_FILL_STORAGE_KEY, JSON.stringify(quickFillTemplates));
+    };
+
+    const renderQuickFillOptions = () => {
+        quickFillSelect.innerHTML = '<option value="">-- Choose saved snippet --</option>';
+        for (const template of quickFillTemplates) {
+            const option = document.createElement('option');
+            option.value = template.id;
+            option.textContent = template.name;
+            quickFillSelect.appendChild(option);
+        }
+
+        const hasTemplates = quickFillTemplates.length > 0;
+        quickFillSelect.disabled = !hasTemplates;
+        applyTemplateButton.disabled = !hasTemplates;
+        deleteTemplateButton.disabled = !hasTemplates;
+    };
+
+    const getTemplateById = (id) => quickFillTemplates.find(template => template.id === id);
+
+    const applyTemplateToFields = (template) => {
+        if (!template) {
+            return;
+        }
+
+        didInput.value = template.did;
+        problemsInput.value = template.problems;
+        didInput.focus();
+    };
+
     
 
     const init = () => {
@@ -62,6 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         displayEntries();
         renderEntryList();
+        renderQuickFillOptions();
     }
 
     window.editEntry = (index) => {
@@ -69,9 +110,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const entry = entries[index];
         dateInput.value = entry.date;
         didInput.value = entry.did;
-        document.getElementById('problems').value = entry.problems;
-        document.getElementById('solutions').value = entry.solutions;
-        form.querySelector('button').textContent = 'Save Changes';
+        problemsInput.value = entry.problems;
+        solutionsInput.value = entry.solutions;
+        submitButton.textContent = 'Save Changes';
         didInput.focus();
     };
 
@@ -144,6 +185,90 @@ document.addEventListener('DOMContentLoaded', () => {
     exportAllButton.addEventListener('click', exportAllEntries);
     shareAllButton.addEventListener('click', shareAllEntries);
 
+    applyTemplateButton.addEventListener('click', () => {
+        const template = getTemplateById(quickFillSelect.value);
+        applyTemplateToFields(template);
+    });
+
+    quickFillSelect.addEventListener('change', () => {
+        const template = getTemplateById(quickFillSelect.value);
+        applyTemplateToFields(template);
+    });
+
+    saveTemplateButton.addEventListener('click', () => {
+        const didValue = didInput.value.trim();
+        const problemsValue = problemsInput.value.trim();
+
+        if (!didValue && !problemsValue) {
+            alert('Add content to "What I did" or "Problems met" before saving a snippet.');
+            return;
+        }
+
+        const selectedId = quickFillSelect.value;
+        const existingIndex = quickFillTemplates.findIndex(template => template.id === selectedId);
+        const defaultNameSource = didValue || problemsValue || `Snippet ${quickFillTemplates.length + 1}`;
+        const defaultName = existingIndex > -1 ? quickFillTemplates[existingIndex].name : defaultNameSource.split('\n')[0].slice(0, 50);
+        const nameInput = prompt('Snippet name', defaultName || '');
+
+        if (nameInput === null) {
+            return;
+        }
+
+        const trimmedName = nameInput.trim();
+
+        if (!trimmedName) {
+            alert('Snippet name cannot be empty.');
+            return;
+        }
+
+        let nextSelectedId = selectedId;
+
+        if (existingIndex > -1) {
+            quickFillTemplates[existingIndex] = {
+                ...quickFillTemplates[existingIndex],
+                name: trimmedName,
+                did: didValue,
+                problems: problemsValue,
+            };
+            nextSelectedId = quickFillTemplates[existingIndex].id;
+        } else {
+            const newTemplate = {
+                id: Date.now().toString(36),
+                name: trimmedName,
+                did: didValue,
+                problems: problemsValue,
+            };
+            quickFillTemplates.push(newTemplate);
+            nextSelectedId = newTemplate.id;
+        }
+
+        persistQuickFillTemplates();
+        renderQuickFillOptions();
+        quickFillSelect.value = nextSelectedId;
+    });
+
+    deleteTemplateButton.addEventListener('click', () => {
+        const selectedId = quickFillSelect.value;
+        if (!selectedId) {
+            alert('Select a snippet to delete.');
+            return;
+        }
+
+        const template = getTemplateById(selectedId);
+        if (!template) {
+            return;
+        }
+
+        if (!confirm(`Delete the snippet "${template.name}"?`)) {
+            return;
+        }
+
+        quickFillTemplates = quickFillTemplates.filter(item => item.id !== selectedId);
+        persistQuickFillTemplates();
+        renderQuickFillOptions();
+        quickFillSelect.value = '';
+    });
+
     searchDateInput.addEventListener('input', (e) => {
         const searchDate = e.target.value;
         if (searchDate) {
@@ -161,8 +286,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const newEntry = {
             date: e.target.date.value,
             did: e.target.did.value,
-            problems: e.target.problems.value,
-            solutions: e.target.solutions.value,
+            problems: problemsInput.value,
+            solutions: solutionsInput.value,
         };
 
         if (editIndex > -1) {
@@ -179,7 +304,8 @@ document.addEventListener('DOMContentLoaded', () => {
         form.reset();
         dateInput.valueAsDate = new Date();
         didInput.focus();
-        form.querySelector('button').textContent = 'Add Entry';
+        submitButton.textContent = 'Add Entry';
+        quickFillSelect.value = '';
     });
 
     init();

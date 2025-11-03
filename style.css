@@ -44,6 +44,30 @@ button:hover {
     background-color: #45a049;
 }
 
+#quick-fill-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+#quick-fill-controls label {
+    margin: 0;
+}
+
+#quick-fill-controls select {
+    flex: 1;
+    min-width: 150px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+#quick-fill-controls button {
+    margin-top: 0;
+}
+
 #entries {
     margin-top: 20px;
 }
